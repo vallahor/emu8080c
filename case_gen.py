@@ -356,7 +356,7 @@ def branch_group():
     for ccc in range(0, CONDS):
         case_bin = '11{0:03b}100'.format(ccc)
         case_hex = int(case_bin, 2)
-        print('case 0x{:03x}: /* C{: <3} addr */'.format(case_hex, condition[ccc]))
+        print('case 0x{:03x}: /* C{: <2} addr */'.format(case_hex, condition[ccc]))
     print("{ \n} break;\n")
 
     case_bin = '11001001'
@@ -373,7 +373,7 @@ def branch_group():
     for ccc in range(0, 8):
         case_bin = '11{0:03b}111'.format(ccc)
         case_hex = int(case_bin, 2)
-        print('case 0x{:03x}: /* RST {:03x} */'.format(case_hex, ccc))
+        print('case 0x{:03x}: /* RST {:x} */'.format(case_hex, ccc))
     print("{ \n} break;\n")
 
     case_bin = '11101001'
@@ -384,7 +384,7 @@ def branch_group():
 
 def machine_control_group():
     print("/* STACK, I/O, MACHINE CONTROL GROUP */")
-    print("n")
+    print("\n")
 
     for rp in range(0, RPS - 1):
         case_bin = '11{0:02b}0101'.format(rp)

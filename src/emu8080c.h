@@ -8,6 +8,8 @@
 #define ADDR_IMM()   (emu->memory[emu->pc + 2] << 8 | emu->memory[emu->pc + 1])
 #define ADDR_RP(x,y) (emu->reg[(x)] << 8 | emu->reg[(y)])
 
+#define CALL_INST 3
+
 void swap(uint8_t* val1, uint8_t* val2) {
     uint8_t tmp = *val1;
     *val1 = *val2;
@@ -194,7 +196,8 @@ uint8_t decode(struct Emu8080c* emu) {
     printf("%04x ", emu->pc);
 
     switch (inst) {
-        /* DATA TRANSFER GROUP */
+
+            /* DATA TRANSFER GROUP */
 
         case 0x040: /* MOV B, B */
         case 0x041: /* MOV B, C */
@@ -375,8 +378,8 @@ uint8_t decode(struct Emu8080c* emu) {
 
         case 0x002: /* STAX BC */
         case 0x012: /* STAX DE */ {
-            uint8_t rp = (inst & 0b00110000) >> 4;
             uint16_t addr;
+            uint8_t rp = (inst & 0b00110000) >> 4;
             switch (rp) {
                 case BC: {
                     addr = ADDR_RP(B, C);
@@ -555,8 +558,8 @@ uint8_t decode(struct Emu8080c* emu) {
         case 0x013: /* INX DE */
         case 0x023: /* INX HL */
         case 0x033: /* INX SP */ {
-            uint8_t rp = (inst & 0b00110000) >> 4;
             uint16_t value;
+            uint8_t rp = (inst & 0b00110000) >> 4;
             switch (rp) {
                 case BC: {
                     value = ADDR_RP(B, C) + 1;
@@ -584,8 +587,8 @@ uint8_t decode(struct Emu8080c* emu) {
         case 0x01b: /* DCX DE */
         case 0x02b: /* DCX HL */
         case 0x03b: /* DCX SP */ {
-            uint8_t rp = (inst & 0b00110000) >> 4;
             uint16_t value;
+            uint8_t rp = (inst & 0b00110000) >> 4;
             switch (rp) {
                 case BC: {
                     value = ADDR_RP(B, C) - 1;
@@ -613,9 +616,9 @@ uint8_t decode(struct Emu8080c* emu) {
         case 0x019: /* DAD DE */
         case 0x029: /* DAD HL */
         case 0x039: /* DAD SP */ {
-            uint8_t rp = (inst & 0b00110000) >> 4;
             uint16_t rp_val;
             uint16_t hl_val = ADDR_MEM();
+            uint8_t rp = (inst & 0b00110000) >> 4;
             switch (rp) {
                 case BC: {
                     rp_val = ADDR_RP(B, C);
@@ -859,14 +862,14 @@ uint8_t decode(struct Emu8080c* emu) {
             printf("CALL [0x%04x]\n", addr);
         } break;
 
-        case 0x0c4: /* CNZ  addr */
-        case 0x0cc: /* CZ   addr */
-        case 0x0d4: /* CNC  addr */
-        case 0x0dc: /* CC   addr */
-        case 0x0e4: /* CPO  addr */
-        case 0x0ec: /* CPE  addr */
-        case 0x0f4: /* CP   addr */
-        case 0x0fc: /* CM   addr */ {
+        case 0x0c4: /* CNZ addr */
+        case 0x0cc: /* CZ  addr */
+        case 0x0d4: /* CNC addr */
+        case 0x0dc: /* CC  addr */
+        case 0x0e4: /* CPO addr */
+        case 0x0ec: /* CPE addr */
+        case 0x0f4: /* CP  addr */
+        case 0x0fc: /* CM  addr */ {
             opbytes = 3;
             uint16_t addr = ADDR_IMM();
             uint8_t ccc = (inst & 0b00111000) >> 3;
@@ -883,7 +886,7 @@ uint8_t decode(struct Emu8080c* emu) {
             opbytes = 0;
             emu->pcl = POP();
             emu->pch = POP();
-            emu->pc += 3;
+            emu->pc += CALL_INST;
             printf("RET\n");
         } break;
 
@@ -900,19 +903,19 @@ uint8_t decode(struct Emu8080c* emu) {
                 opbytes = 0;
                 emu->pcl = POP();
                 emu->pch = POP();
-                emu->pc += 3;
+                emu->pc += CALL_INST;
             }
             printf("R%s\n", cond_lookup[ccc]);
         } break;
 
-        case 0x0c7: /* RST 000 */
-        case 0x0cf: /* RST 001 */
-        case 0x0d7: /* RST 002 */
-        case 0x0df: /* RST 003 */
-        case 0x0e7: /* RST 004 */
-        case 0x0ef: /* RST 005 */
-        case 0x0f7: /* RST 006 */
-        case 0x0ff: /* RST 007 */ {
+        case 0x0c7: /* RST 0 */
+        case 0x0cf: /* RST 1 */
+        case 0x0d7: /* RST 2 */
+        case 0x0df: /* RST 3 */
+        case 0x0e7: /* RST 4 */
+        case 0x0ef: /* RST 5 */
+        case 0x0f7: /* RST 6 */
+        case 0x0ff: /* RST 7 */ {
             uint8_t nnn = (inst & 0b00111000) >> 3;
             PUSH(emu->pch);
             PUSH(emu->pcl);
@@ -928,12 +931,12 @@ uint8_t decode(struct Emu8080c* emu) {
 
 
             /* STACK, I/O, MACHINE CONTROL GROUP */
+
         case 0x0c5: /* PUSH BC */
         case 0x0d5: /* PUSH DE */
         case 0x0e5: /* PUSH HL */ {
+            uint8_t h, l;
             uint8_t rp = (inst & 0b0110000) >> 4;
-            uint8_t h;
-            uint8_t l;
             switch (rp) {
                 case BC: {
                     h = emu->reg[B];
@@ -1000,12 +1003,8 @@ uint8_t decode(struct Emu8080c* emu) {
         } break;
 
         case 0x0e3: /* XTHL */ {
-            uint8_t l = emu->reg[L];
-            uint8_t h = emu->reg[H];
-            emu->reg[L] = emu->memory[emu->sp];
-            emu->reg[H] = emu->memory[emu->sp + 1];
-            emu->memory[emu->sp] = l;
-            emu->memory[emu->sp + 1] = h;
+            swap(&emu->reg[L], &emu->memory[emu->sp]);
+            swap(&emu->reg[H], &emu->memory[emu->sp + 1]);
             printf("XTHL\n");
         } break;
 
@@ -1016,15 +1015,14 @@ uint8_t decode(struct Emu8080c* emu) {
 
         case 0x0db: /* IN port */ {
             opbytes = 2;
-            uint8_t port = emu->memory[emu->pc + 1];
-            emu->reg[A] = port;
+            /*  */
             printf("IN port\n");
         } break;
 
         case 0x0d3: /* OUT port */ {
             opbytes = 2;
-            emu->memory[emu->pc + 1] = emu->reg[A];
-            printf("OUT 0x%2x\n", emu->memory[emu->pc + 1]);
+            /*  */
+            printf("OUT 0x%2x\n", 0x0);
         } break;
 
         case 0x0fb: /* EI */ {
