@@ -190,11 +190,11 @@ uint8_t cond(Emu8080c* emu, uint8_t ccc) {
 }
 
 uint8_t decode(struct Emu8080c* emu) {
-    uint8_t inst = emu->memory[emu->pc];
     uint8_t opbytes = 1;
 
     printf("%04x ", emu->pc);
 
+    uint8_t inst = emu->memory[emu->pc];
     switch (inst) {
 
             /* DATA TRANSFER GROUP */
@@ -362,8 +362,8 @@ uint8_t decode(struct Emu8080c* emu) {
 
         case 0x00a: /* LDAX BC */
         case 0x01a: /* LDAX DE */ {
-            uint8_t rp = (inst & 0b00110000) >> 4;
             uint16_t addr;
+            uint8_t rp = (inst & 0b00110000) >> 4;
             switch (rp) {
                 case BC: {
                     addr = ADDR_RP(B, C);
@@ -971,9 +971,9 @@ uint8_t decode(struct Emu8080c* emu) {
         case 0x0c1: /* POP BC */
         case 0x0d1: /* POP DE */
         case 0x0e1: /* POP HL */ {
-            uint8_t rp = (inst & 0b00110000) >> 4;
             uint8_t pop_l = POP();
             uint8_t pop_h = POP();
+            uint8_t rp = (inst & 0b00110000) >> 4;
             switch (rp) {
                 case BC: {
                     emu->reg[B] = pop_h;
