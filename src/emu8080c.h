@@ -86,13 +86,7 @@ typedef struct Emu8080c {
             uint8_t pcl;
         };
     };
-    union {
-        uint16_t sp;
-        struct {
-            uint8_t sph;
-            uint8_t spl;
-        };
-    };
+    uint16_t sp;
     uint8_t* memory;
     uint8_t int_enable;
     uint32_t code_size;
