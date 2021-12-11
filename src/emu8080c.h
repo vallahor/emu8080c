@@ -89,7 +89,6 @@ typedef struct Emu8080c {
     uint16_t sp;
     uint8_t* memory;
     uint8_t int_enable;
-    uint32_t code_size;
 } Emu8080c;
 
 uint8_t aux_cy(uint8_t val_old, uint8_t val_new) {
