@@ -5,8 +5,7 @@
 #include "emu8080c.h"
 
 
-void load_file(struct Emu8080c* emu, char* filename, uint32_t offset)
-{
+void load_file(struct Emu8080c* emu, char* filename, uint32_t offset) {
     FILE* file = fopen(filename, "rb");
 
     if (!file) {
