@@ -20,7 +20,7 @@ That command will build and run the project, printing all the instructions and e
 Is a python script I made to generate all instructions hex numbers, at first I was extracting bits by hand, wich grew quickly in complexty.
 You can see that in following example.
 
-```
+```C
 /*
 Instruction // Don't mean that instruction exists
 [10[ddd]110]
