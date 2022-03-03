@@ -29,11 +29,7 @@ int main() {
 
     load_file(&emu, "..\\bin\\cpudiag.bin", 0x100);
 
-    emu.memory[0] = 0xc3;
-    emu.memory[1] = 0;
-    emu.memory[2] = 0x01;
-
-    emu.pc = 0;
+    emu.pc = 0x100;
     for (;;) {
         emu.pc += decode(&emu);
         if (emu.pc == 0x5) exit(0);
